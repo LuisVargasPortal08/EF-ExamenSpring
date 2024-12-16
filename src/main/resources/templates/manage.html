@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Autos</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container my-5">
+    <h1 class="text-center mb-4">Gestionar Autos</h1>
+
+    <!-- Formulario para añadir/actualizar autos -->
+    <div class="card shadow mb-5">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Crear/Actualizar Auto</h4>
+        </div>
+        <div class="card-body">
+            <form id="carForm" class="row g-3">
+                <div class="col-md-4">
+                    <label for="carId" class="form-label">ID (opcional)</label>
+                    <input type="number" class="form-control" id="carId" name="carId" placeholder="ID del auto">
+                </div>
+                <div class="col-md-4">
+                    <label for="make" class="form-label">Marca</label>
+                    <input type="text" class="form-control" id="make" name="make" placeholder="Marca del auto" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="model" class="form-label">Modelo</label>
+                    <input type="text" class="form-control" id="model" name="model" placeholder="Modelo del auto" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="year" class="form-label">Año</label>
+                    <input type="number" class="form-control" id="year" name="year" placeholder="Año de fabricación" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="vin" class="form-label">VIN</label>
+                    <input type="text" class="form-control" id="vin" name="vin" placeholder="Número de identificación vehicular" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="licensePlate" class="form-label">Placa</label>
+                    <input type="text" class="form-control" id="licensePlate" name="licensePlate" placeholder="Placa del vehículo" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="ownerName" class="form-label">Propietario</label>
+                    <input type="text" class="form-control" id="ownerName" name="ownerName" placeholder="Nombre del propietario" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="color" class="form-label">Color</label>
+                    <input type="text" class="form-control" id="color" name="color" placeholder="Color del auto" required>
+                </div>
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="reset" class="btn btn-secondary">Limpiar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla para mostrar autos -->
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Año</th>
+                <th>VIN</th>
+                <th>Placa</th>
+                <th>Propietario</th>
+                <th>Color</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+            </thead>
+            <tbody id="carTableBody">
+            <!-- Filas dinámicas generadas por JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Bootstrap JS (con dependencias de Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Script para manejar operaciones CRUD -->
+<script>
+    const carTableBody = document.getElementById("carTableBody");
+    const carForm = document.getElementById("carForm");
+
+    // Simulación de datos iniciales
+    const cars = [
+        { carId: 1, make: "Toyota", model: "Corolla", year: 2018, vin: "1NXBR12E3YZ123456", licensePlate: "ABC123", ownerName: "Juan Perez", color: "Rojo" },
+        { carId: 2, make: "Honda", model: "Civic", year: 2020, vin: "2HGES26785H654321", licensePlate: "XYZ789", ownerName: "Maria Lopez", color: "Azul" }
+    ];
+
+    // Renderizar tabla
+    function renderTable() {
+        carTableBody.innerHTML = "";
+        cars.forEach(car => {
+            const row = `
+                    <tr>
+                        <td>${car.carId}</td>
+                        <td>${car.make}</td>
+                        <td>${car.model}</td>
+                        <td>${car.year}</td>
+                        <td>${car.vin}</td>
+                        <td>${car.licensePlate}</td>
+                        <td>${car.ownerName}</td>
+                        <td>${car.color}</td>
+                        <td class="text-center">
+                            <button class="btn btn-warning btn-sm me-2" onclick="editCar(${car.carId})">Editar</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteCar(${car.carId})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            carTableBody.innerHTML += row;
+        });
+    }
+
+    // Editar auto
+    function editCar(carId) {
+        const car = cars.find(c => c.carId === carId);
+        if (car) {
+            Object.keys(car).forEach(key => {
+                const input = document.getElementById(key);
+                if (input) input.value = car[key];
+            });
+        }
+    }
+
+    // Eliminar auto
+    function deleteCar(carId) {
+        const index = cars.findIndex(c => c.carId === carId);
+        if (index > -1) {
+            cars.splice(index, 1);
+            renderTable();
+        }
+    }
+
+    // Manejar envío del formulario
+    carForm.addEventListener("submit", event => {
+        event.preventDefault();
+        const formData = new FormData(carForm);
+        const newCar = Object.fromEntries(formData.entries());
+        newCar.carId = parseInt(newCar.carId) || cars.length + 1; // Generar ID si no existe
+        const index = cars.findIndex(c => c.carId === newCar.carId);
+        if (index > -1) {
+            cars[index] = newCar; // Actualizar auto existente
+        } else {
+            cars.push(newCar); // Agregar nuevo auto
+        }
+        carForm.reset();
+        renderTable();
+    });
+
+    // Inicializar tabla
+    renderTable();
+</script>
+</body>
+</html>
